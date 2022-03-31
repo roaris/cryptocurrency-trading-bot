@@ -5,3 +5,15 @@ services:
     tty: true
     volumes:
       - .:/go/src/app/
+  db:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: db_dev
+    volumes:
+      - db-volume:/var/lib/mysql
+volumes:
+  db-volume:
