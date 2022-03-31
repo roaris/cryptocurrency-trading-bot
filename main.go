@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cryptocurrency-trading-bot/repository"
 	"github.com/cryptocurrency-trading-bot/utils"
 )
 
@@ -30,4 +31,5 @@ func main() {
 	var ticker Ticker
 	json.Unmarshal(resp, &ticker)
 	fmt.Println(ticker)
+	fmt.Println(*repository.DB)
 }
