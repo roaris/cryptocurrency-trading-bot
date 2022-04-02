@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cryptocurrency-trading-bot/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -24,4 +25,6 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	DB.AutoMigrate(&model.Candle{})
 }
