@@ -9,6 +9,5 @@ type Candle struct {
 	High      float64   `gorm:"not null"`
 	Low       float64   `gorm:"not null"`
 	Volume    float64   `gorm:"not null"`
-	CreatedAt time.Time `gorm:"not null"`
-	UpdatedAt time.Time `gorm:"not null"`
+	Timestamp time.Time `gorm:"not null"`
 }
