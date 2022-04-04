@@ -1,7 +1,12 @@
 package models
 
 import (
+	"encoding/json"
+	"log"
+	"net/url"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Ticker struct {
@@ -27,6 +32,57 @@ func (t *Ticker) getMidPrice() float64 {
 }
 
 func (t *Ticker) truncateDateTime() time.Time {
-	dateTime, _ := time.Parse(time.RFC3339, t.Timestamp+"Z")
+	dateTime, _ := time.Parse(time.RFC3339, t.Timestamp)
 	return dateTime.Truncate(time.Minute)
+}
+
+type jsonrpc2 struct {
+	Version string      `json:"version"`
+	Method  string      `json:"method"`
+	Params  interface{} `json:"params"`
+	Result  interface{} `json:"result,omitempty"`
+	ID      *int        `json:"id,omitemtpy"`
+}
+
+type subscribeParams struct {
+	Channel string `json:"channel"`
+}
+
+func GetRealTimeTicker(ch chan<- Ticker) {
+	u := url.URL{Scheme: "wss", Host: "ws.lightstream.bitflyer.com", Path: "/json-rpc"}
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer c.Close()
+
+	if err := c.WriteJSON(&jsonrpc2{Version: "2.0", Method: "subscribe", Params: subscribeParams{"lightning_ticker_BTC_JPY"}}); err != nil {
+		log.Fatal(err)
+	}
+
+OUTER:
+	for {
+		var message jsonrpc2
+		if err := c.ReadJSON(&message); err != nil {
+			log.Println(err)
+			return
+		}
+
+		if message.Method == "channelMessage" {
+			for k, v := range (message.Params).(map[string]interface{}) {
+				if k == "message" {
+					marshalTicker, err := json.Marshal(v)
+					if err != nil {
+						continue OUTER
+					}
+					var ticker Ticker
+					err = json.Unmarshal(marshalTicker, &ticker)
+					if err != nil {
+						continue OUTER
+					}
+					ch <- ticker
+				}
+			}
+		}
+	}
 }

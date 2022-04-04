@@ -1,19 +1,14 @@
 package controllers
 
 import (
-	"encoding/json"
-	"time"
-
 	"github.com/cryptocurrency-trading-bot/models"
-	"github.com/cryptocurrency-trading-bot/utils"
 )
 
 func Streaming() {
-	for {
-		resp, _ := utils.DoHttpRequest("GET", "https://api.bitflyer.com/v1/ticker", nil, nil, nil)
-		var ticker models.Ticker
-		json.Unmarshal(resp, &ticker)
+	tickerChannel := make(chan models.Ticker)
+	go models.GetRealTimeTicker(tickerChannel)
+
+	for ticker := range tickerChannel {
 		models.CreateCandle(&ticker)
-		time.Sleep(time.Second)
 	}
 }
