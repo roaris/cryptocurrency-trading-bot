@@ -5,13 +5,13 @@ import (
 )
 
 type Candle struct {
-	ID        uint
-	Open      float64   `gorm:"not null"`
-	Close     float64   `gorm:"not null"`
-	High      float64   `gorm:"not null"`
-	Low       float64   `gorm:"not null"`
-	Volume    float64   `gorm:"not null"`
-	Timestamp time.Time `gorm:"not null;unique"`
+	ID        uint      `json:"id"`
+	Open      float64   `gorm:"not null" json:"open"`
+	Close     float64   `gorm:"not null" json:"close"`
+	High      float64   `gorm:"not null" json:"high"`
+	Low       float64   `gorm:"not null" json:"low"`
+	Volume    float64   `gorm:"not null" json:"volume"`
+	Timestamp time.Time `gorm:"not null;unique" json:"timestamp"`
 }
 
 func findCandleWithTime(t time.Time) (candle *Candle) {
@@ -41,4 +41,11 @@ func CreateCandle(t *Ticker) (err error) {
 		err = db.Save(candle).Error
 	}
 	return err
+}
+
+func GetAllCandles() (candles []Candle, err error) {
+	if db.Find(&candles).Error != nil {
+		return nil, err
+	}
+	return candles, nil
 }

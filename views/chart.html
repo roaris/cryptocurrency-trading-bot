@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Chart</title>
+    <style>
+      #chart {
+        margin: 0 auto;
+        max-width: 1000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+      async function drawChart() {
+        const candles = await axios.get("/api/candles").then((res) => res.data);
+        var options = {
+          series: [
+            {
+              data: candles.map((candle) => {
+                return {
+                  x: candle.timestamp,
+                  y: [candle.open, candle.high, candle.low, candle.close],
+                };
+              }),
+            },
+          ],
+          chart: {
+            type: "candlestick",
+            height: 350,
+          },
+          title: {
+            text: "CandleStick Chart",
+            align: "left",
+          },
+          xaxis: {
+            type: "datetime",
+          },
+          yaxis: {
+            tooltip: {
+              enabled: true,
+            },
+          },
+        };
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+
+        setInterval(async () => {
+          const candles = await axios
+            .get("/api/candles")
+            .then((res) => res.data);
+          chart.updateSeries([
+            {
+              data: candles.map((candle) => {
+                return {
+                  x: candle.timestamp,
+                  y: [candle.open, candle.high, candle.low, candle.close],
+                };
+              }),
+            },
+          ]);
+        }, 3000);
+      }
+      drawChart();
+    </script>
+  </body>
+</html>
