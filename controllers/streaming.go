@@ -8,7 +8,9 @@ func Streaming() {
 	tickerChannel := make(chan models.Ticker)
 	go models.GetRealTimeTicker(tickerChannel)
 
-	for ticker := range tickerChannel {
-		models.CreateCandle(&ticker)
-	}
+	go func() {
+		for ticker := range tickerChannel {
+			models.CreateCandle(&ticker)
+		}
+	}()
 }

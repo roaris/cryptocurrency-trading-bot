@@ -11,6 +11,8 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: db_dev
+    ports:
+      - "8000:8000"
   db:
     image: mysql:latest
     ports:
