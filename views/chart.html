@@ -45,6 +45,22 @@
         };
         var chart = new ApexCharts(document.querySelector("#chart"), options);
         chart.render();
+
+        setInterval(async () => {
+          const candles = await axios
+            .get("/api/candles")
+            .then((res) => res.data);
+          chart.updateSeries([
+            {
+              data: candles.map((candle) => {
+                return {
+                  x: candle.timestamp,
+                  y: [candle.open, candle.high, candle.low, candle.close],
+                };
+              }),
+            },
+          ]);
+        }, 3000);
       }
       drawChart();
     </script>
