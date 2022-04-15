@@ -2,67 +2,113 @@
   <head>
     <title>Chart</title>
     <style>
-      #chart {
+      main {
         margin: 0 auto;
         max-width: 1000px;
       }
     </style>
   </head>
   <body>
-    <div id="chart"></div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
-      async function drawChart() {
-        const candles = await axios.get("/api/candles").then((res) => res.data);
-        var options = {
-          series: [
-            {
-              data: candles.map((candle) => {
-                return {
-                  x: candle.timestamp,
-                  y: [candle.open, candle.high, candle.low, candle.close],
-                };
-              }),
-            },
-          ],
-          chart: {
-            type: "candlestick",
-            height: 350,
-          },
-          title: {
-            text: "CandleStick Chart",
-            align: "left",
-          },
-          xaxis: {
-            type: "datetime",
-          },
-          yaxis: {
-            tooltip: {
-              enabled: true,
-            },
-          },
-        };
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-        chart.render();
-
-        setInterval(async () => {
+    <main>
+      <div id="chart"></div>
+      SMA <input type="checkbox" id="sma-enable" /> Period1 <input id="sma-period1" /> Period2 <input id="sma-period2" /> Period3 <input id="sma-period3" />
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+      <script>
+        async function drawChart() {
           const candles = await axios
             .get("/api/candles")
-            .then((res) => res.data);
-          chart.updateSeries([
-            {
-              data: candles.map((candle) => {
-                return {
-                  x: candle.timestamp,
-                  y: [candle.open, candle.high, candle.low, candle.close],
-                };
-              }),
+            .then((res) => res.data.candles);
+          var options = {
+            series: [
+              {
+                name: "candlestick",
+                type: "candlestick",
+                data: candles.map((candle) => {
+                  return {
+                    x: candle.timestamp,
+                    y: [candle.open, candle.high, candle.low, candle.close],
+                  };
+                }),
+              },
+            ],
+            chart: {
+              type: "line",
+              height: 350,
             },
-          ]);
-        }, 3000);
-      }
-      drawChart();
-    </script>
+            title: {
+              text: "CandleStick Chart",
+              align: "left",
+            },
+            xaxis: {
+              type: "datetime",
+            },
+            yaxis: {
+              tooltip: {
+                enabled: true,
+              },
+            },
+            stroke: { // seriesで指定したデータの描画で使われるwidth 更新に備えて、余分に用意しておく
+              width: [1, 2, 2, 2]
+            },
+          };
+          var chart = new ApexCharts(document.querySelector("#chart"), options);
+          chart.render();
+
+          setInterval(async () => {
+            params = {};
+
+            if (document.getElementById("sma-enable").checked) {
+              params.sma = true;
+              params.smaPeriod1 = document.getElementById("sma-period1").value;
+              params.smaPeriod2 = document.getElementById("sma-period2").value;
+              params.smaPeriod3 = document.getElementById("sma-period3").value;
+            }
+
+            const dataFrame = await axios
+              .get("/api/candles", { params: params })
+              .then((res) => res.data);
+
+            const candles = dataFrame.candles;
+            let series = [
+              {
+                name: "candlestick",
+                type: "candlestick",
+                data: candles.map((candle) => {
+                  return {
+                    x: candle.timestamp,
+                    y: [candle.open, candle.high, candle.low, candle.close],
+                  };
+                }),
+              },
+            ];
+
+            if (dataFrame.smas) {
+              const smas = dataFrame.smas;
+              smas.forEach((sma) => {
+                let datas = [];
+                sma.values.forEach((value, i) => {
+                  if (value != 0) {
+                    datas.push({
+                      x: candles[i].timestamp,
+                      y: value,
+                    });
+                  }
+                });
+                series.push({
+                  name: `sma-period${sma.period}`,
+                  type: "line",
+                  data: datas,
+                });
+              });
+            }
+
+            chart.updateSeries(series);
+          }, 3000);
+        }
+
+        drawChart();
+      </script>
+    </main>
   </body>
 </html>
