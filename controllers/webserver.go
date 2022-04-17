@@ -48,6 +48,25 @@ func candleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ema := r.URL.Query().Get("ema")
+	if ema != "" {
+		strEmaPeriod1 := r.URL.Query().Get("emaPeriod1")
+		strEmaPeriod2 := r.URL.Query().Get("emaPeriod2")
+		strEmaPeriod3 := r.URL.Query().Get("emaPeriod3")
+		emaPeriod1, err := strconv.Atoi(strEmaPeriod1)
+		if err == nil {
+			df.AddEma(emaPeriod1)
+		}
+		emaPeriod2, err := strconv.Atoi(strEmaPeriod2)
+		if err == nil {
+			df.AddEma(emaPeriod2)
+		}
+		emaPeriod3, err := strconv.Atoi(strEmaPeriod3)
+		if err == nil {
+			df.AddEma(emaPeriod3)
+		}
+	}
+
 	res, err := json.Marshal(df)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
