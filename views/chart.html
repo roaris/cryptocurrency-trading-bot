@@ -12,6 +12,7 @@
     <main>
       <div id="chart"></div>
       SMA <input type="checkbox" id="sma-enable" /> Period1 <input id="sma-period1" /> Period2 <input id="sma-period2" /> Period3 <input id="sma-period3" /> <br />
+      EMA <input type="checkbox" id="ema-enable" /> Period1 <input id="ema-period1" /> Period2 <input id="ema-period2" /> Period3 <input id="ema-period3" /> <br />
       <button id="chart-update-button">OK</button>
       <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -50,7 +51,7 @@
               },
             },
             stroke: { // seriesで指定したデータの描画で使われるwidth 更新に備えて、余分に用意しておく
-              width: [1, 2, 2, 2]
+              width: [1, 2, 2, 2, 2, 2, 2]
             },
           };
           var chart = new ApexCharts(document.querySelector("#chart"), options);
@@ -64,6 +65,13 @@
               params.smaPeriod1 = document.getElementById("sma-period1").value;
               params.smaPeriod2 = document.getElementById("sma-period2").value;
               params.smaPeriod3 = document.getElementById("sma-period3").value;
+            }
+
+            if (document.getElementById("ema-enable").checked) {
+              params.ema = true;
+              params.emaPeriod1 = document.getElementById("ema-period1").value;
+              params.emaPeriod2 = document.getElementById("ema-period2").value;
+              params.emaPeriod3 = document.getElementById("ema-period3").value;
             }
 
             const dataFrame = await axios
@@ -98,6 +106,26 @@
                 });
                 series.push({
                   name: `sma-period${sma.period}`,
+                  type: "line",
+                  data: datas,
+                });
+              });
+            }
+
+            if (dataFrame.emas) {
+              const emas = dataFrame.emas;
+              emas.forEach((ema) => {
+                let datas = [];
+                ema.values.forEach((value, i) => {
+                  if (value != 0) {
+                    datas.push({
+                      x: candles[i].timestamp,
+                      y: value
+                    });
+                  }
+                });
+                series.push({
+                  name: `ema-period${ema.period}`,
                   type: "line",
                   data: datas,
                 });
