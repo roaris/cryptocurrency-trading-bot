@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 )
@@ -20,6 +21,19 @@ type Balance struct {
 	CurrentCode string  `json:"currency_code"`
 	Amount      float64 `json:"amount"`
 	Available   float64 `json:"available"`
+}
+
+type Order struct {
+	ProductCode    string  `json:"product_code"`     // BTC_JPY
+	ChildOrderType string  `json:"child_order_type"` // LIMIT or MARKET
+	Side           string  `json:"side"`             // BUY or SELL
+	Size           float64 `json:"size"`
+	MinuteToExpire int     `json:"minute_to_expire"` // 期限切れまでの時間
+	TimeInForce    string  `json:"time_in_force"` // 執行数量条件 GTC or IOC or FOK
+}
+
+type OrderRes struct {
+	ChildOrderAcceptanceId string `json:"child_order_acceptance_id"`
 }
 
 func NewAPIClient(key, secret string) *APIClient {
@@ -57,4 +71,29 @@ func (a APIClient) GetMeBalance() ([]Balance, error) {
 		return nil, err
 	}
 	return balance, nil
+}
+
+// 成行注文を行う
+func (a APIClient) SendOrder(side string, size float64) (*OrderRes, error) {
+	method := "POST"
+	endpoint := "/v1/me/sendchildorder"
+	body := Order{"BTC_JPY", "MARKET", side, size, 43200, "GTC"}
+	data, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	header := a.getHeader(method, endpoint, data)
+	resp, err := DoHttpRequest(method, baseURL+endpoint, header, nil, data)
+
+	if err != nil {
+		return nil, err
+	}
+	var orderRes OrderRes
+	if err := json.Unmarshal(resp, &orderRes); err != nil {
+		return nil, err
+	}
+	if orderRes.ChildOrderAcceptanceId == "" {
+		return nil, errors.New(string(resp))
+	}
+	return &orderRes, nil
 }
