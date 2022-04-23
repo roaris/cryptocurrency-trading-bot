@@ -43,8 +43,8 @@ func CreateCandle(t *Ticker) (err error) {
 	return err
 }
 
-func GetAllCandles() (candles []Candle, err error) {
-	if db.Find(&candles).Error != nil {
+func GetCandles(limit int) (candles []Candle, err error) {
+	if db.Table("(?) as c", db.Order("timestamp desc").Limit(limit).Model(&Candle{})).Order("timestamp asc").Find(&candles).Error != nil {
 		return nil, err
 	}
 	return candles, nil

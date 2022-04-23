@@ -21,7 +21,13 @@ func viewChartHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func candleHandler(w http.ResponseWriter, r *http.Request) {
-	candles, err := models.GetAllCandles()
+	strLimit := r.URL.Query().Get("limit")
+	limit, err := strconv.Atoi(strLimit)
+	if err != nil {
+		limit = 100
+	}
+
+	candles, err := models.GetCandles(limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
