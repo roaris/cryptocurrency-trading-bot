@@ -23,12 +23,13 @@ func findCandleWithTime(t time.Time) (candle *Candle) {
 }
 
 func CreateCandle(t *Ticker) (err error) {
-	truncateDateTime := t.truncateDateTime()
-	candle := findCandleWithTime(truncateDateTime)
+	truncateDateTimeUTC := t.truncateDateTime()
+	truncateDateTimeJST := truncateDateTimeUTC.Add(9 * time.Hour)
+	candle := findCandleWithTime(truncateDateTimeJST)
 	price := t.getMidPrice()
 
 	if candle == nil {
-		err = db.Save(&Candle{Open: price, Close: price, High: price, Low: price, Volume: t.Volume, Timestamp: truncateDateTime}).Error
+		err = db.Save(&Candle{Open: price, Close: price, High: price, Low: price, Volume: t.Volume, Timestamp: truncateDateTimeJST}).Error
 	} else {
 		candle.Close = price
 		if candle.High < price {
