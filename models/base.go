@@ -26,4 +26,5 @@ func init() {
 	}
 
 	db.AutoMigrate(&Candle{})
+	db.AutoMigrate(&SignalEvent{})
 }
