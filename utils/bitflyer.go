@@ -36,6 +36,10 @@ type OrderRes struct {
 	ChildOrderAcceptanceId string `json:"child_order_acceptance_id"`
 }
 
+type OrderStatus struct {
+	ChildOrderState string `json:"child_order_state"`
+}
+
 func NewAPIClient(key, secret string) *APIClient {
 	return &APIClient{key, secret}
 }
@@ -96,4 +100,27 @@ func (a APIClient) SendOrder(side string, size float64) (*OrderRes, error) {
 		return nil, errors.New(string(resp))
 	}
 	return &orderRes, nil
+}
+
+// 注文の状態を取得する
+func (a APIClient) GetOrderStatus(childOrderAcceptanceId string) (string, error) {
+	method := "GET"
+	endpoint := "/v1/me/getchildorders"
+	header := a.getHeader(method, endpoint, nil)
+	query := map[string]string{
+		"child_order_acceptance_id": childOrderAcceptanceId,
+	}
+	resp, err := DoHttpRequest(method, baseURL+endpoint, header, query, nil)
+
+	if err != nil {
+		return "", err
+	}
+	var orderStatus []OrderStatus
+	if err := json.Unmarshal(resp, &orderStatus); err != nil {
+		return "", err
+	}
+	if len(orderStatus) == 0 {
+		return "", errors.New("Specified order does not exist.")
+	}
+	return orderStatus[0].ChildOrderState, nil
 }
