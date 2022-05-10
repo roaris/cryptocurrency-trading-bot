@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"os"
 	"strconv"
 	"time"
 )
@@ -24,12 +25,12 @@ type Balance struct {
 }
 
 type Order struct {
-	ProductCode    string  `json:"product_code"`     // BTC_JPY
+	ProductCode    string  `json:"product_code"`     // ex. BTC_JPY
 	ChildOrderType string  `json:"child_order_type"` // LIMIT or MARKET
 	Side           string  `json:"side"`             // BUY or SELL
 	Size           float64 `json:"size"`
 	MinuteToExpire int     `json:"minute_to_expire"` // 期限切れまでの時間
-	TimeInForce    string  `json:"time_in_force"` // 執行数量条件 GTC or IOC or FOK
+	TimeInForce    string  `json:"time_in_force"`    // 執行数量条件 GTC or IOC or FOK
 }
 
 type OrderRes struct {
@@ -81,7 +82,8 @@ func (a APIClient) GetMeBalance() ([]Balance, error) {
 func (a APIClient) SendOrder(side string, size float64) (*OrderRes, error) {
 	method := "POST"
 	endpoint := "/v1/me/sendchildorder"
-	body := Order{"BTC_JPY", "MARKET", side, size, 43200, "GTC"}
+	productCode := os.Getenv("PRODUCT_CODE")
+	body := Order{productCode, "MARKET", side, size, 43200, "GTC"}
 	data, err := json.Marshal(body)
 	if err != nil {
 		return nil, err

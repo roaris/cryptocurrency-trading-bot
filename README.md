@@ -6,11 +6,12 @@ bitFlyerのAPIを通じて、仮想通貨取引を行うプログラム
 
 ## 起動
 ### .envの用意
-bitFlyer Lightningで取得したAPI KeyとAPI Secretを.envに書く
+bitFlyer Lightningで取得したAPI KeyとAPI Secret、取引する銘柄を.envに書く
 
 ```
 API_KEY = ...
 API_SECRET = ...
+PRODUCT_CODE = ...
 ```
 
 ### Dockerの起動

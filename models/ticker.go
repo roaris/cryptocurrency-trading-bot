@@ -2,8 +2,10 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -56,7 +58,9 @@ func GetRealTimeTicker(ch chan<- Ticker) {
 	}
 	defer c.Close()
 
-	if err := c.WriteJSON(&jsonrpc2{Version: "2.0", Method: "subscribe", Params: subscribeParams{"lightning_ticker_BTC_JPY"}}); err != nil {
+	productCode := os.Getenv("PRODUCT_CODE")
+	channel := fmt.Sprintf("lightning_ticker_%s", productCode)
+	if err := c.WriteJSON(&jsonrpc2{Version: "2.0", Method: "subscribe", Params: subscribeParams{channel}}); err != nil {
 		log.Fatal(err)
 	}
 
