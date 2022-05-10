@@ -11,6 +11,10 @@ import (
 
 var db *gorm.DB
 
+type Tabler interface {
+	TableName() string
+}
+
 func init() {
 	dbUserName := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")

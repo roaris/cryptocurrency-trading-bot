@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -12,6 +15,11 @@ type Candle struct {
 	Low       float64   `gorm:"not null" json:"low"`
 	Volume    float64   `gorm:"not null" json:"volume"`
 	Timestamp time.Time `gorm:"not null;unique" json:"timestamp"`
+}
+
+func (Candle) TableName() string {
+	productCode := os.Getenv("PRODUCT_CODE")
+	return fmt.Sprintf("%s_candles", strings.ToLower(productCode))
 }
 
 func findCandleWithTime(t time.Time) (candle *Candle) {
