@@ -73,6 +73,8 @@ func candleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	df.AddEvents()
+
 	res, err := json.Marshal(df)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -27,3 +27,10 @@ func (s *SignalEvent) Save() error {
 	err := db.Save(s).Error
 	return err
 }
+
+func GetSignalEventsAfterTime(t time.Time) (signalEvents []SignalEvent, err error) {
+	if err := db.Where("created_at >= ?", t).Find(&signalEvents).Error; err != nil {
+		return nil, err
+	}
+	return signalEvents, nil
+}
