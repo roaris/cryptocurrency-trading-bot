@@ -23,7 +23,7 @@ func (b *bot) trade() {
 
 	limit := 15
 	candles, err := models.GetCandles(limit)
-	if err != nil {
+	if err != nil || len(candles) < limit {
 		return
 	}
 
@@ -33,14 +33,14 @@ func (b *bot) trade() {
 	ema1 := algos.CalcEma(emaPeriod1, df.Closes())
 	ema2 := algos.CalcEma(emaPeriod2, df.Closes())
 
-	if ema1[limit-3] < ema2[limit-3] && ema1[limit-2] > ema2[limit-2] && b.status == "SELL" {
+	if ema1[limit-2] < ema2[limit-2] && ema1[limit-1] > ema2[limit-1] && b.status == "SELL" {
 		b.status = "BUY"
 		b.apiClient.SendOrder("BUY", 0.001)
 		signalEvent := models.NewSignalEvent("BUY", 0.001)
 		signalEvent.Save()
 	}
 
-	if ema1[limit-3] > ema2[limit-3] && ema1[limit-2] < ema2[limit-2] && b.status == "BUY" {
+	if ema1[limit-2] > ema2[limit-2] && ema1[limit-1] < ema2[limit-1] && b.status == "BUY" {
 		b.status = "SELL"
 		b.apiClient.SendOrder("SELL", 0.001)
 		signalEvent := models.NewSignalEvent("SELL", 0.001)
