@@ -11,7 +11,11 @@ func Streaming() {
 	tickerChannel := make(chan models.Ticker)
 	apiClient := utils.NewAPIClient(os.Getenv("API_KEY"), os.Getenv("API_SECRET"))
 	bot := bot{apiClient, "SELL", false}
-	go models.GetRealTimeTicker(tickerChannel)
+	go func() {
+		for {
+			models.GetRealTimeTicker(tickerChannel)
+		}
+	}()
 
 	go func() {
 		for ticker := range tickerChannel {

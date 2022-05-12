@@ -69,7 +69,7 @@ OUTER:
 		var message jsonrpc2
 		if err := c.ReadJSON(&message); err != nil {
 			log.Println(err)
-			continue
+			break
 		}
 
 		if message.Method == "channelMessage" {
