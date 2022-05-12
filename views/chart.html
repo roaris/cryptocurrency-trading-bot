@@ -19,9 +19,14 @@
       <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
       <script>
         async function drawChart() {
-          const candles = await axios
+          const { candles, signalEvents } = await axios
             .get("/api/candles")
-            .then((res) => res.data.candles);
+            .then((res) => {
+              return {
+                candles: res.data.candles,
+                signalEvents: res.data.signal_events
+              }
+            });
           var options = {
             series: [
               {
@@ -53,6 +58,26 @@
               tooltip: {
                 enabled: true,
               },
+            },
+            annotations: {
+              xaxis: signalEvents.map((signalEvent) => {
+                const color = signalEvent.side === "BUY" ? "#f08080" : "#6495ed";
+                return {
+                  x: new Date(signalEvent.created_at).getTime(),
+                  borderColor: color,
+                  label: {
+                    borderColor: color,
+                    style: {
+                      fontSize: "10px",
+                      color: "#fff",
+                      background: color,
+                    },
+                    orientation: "horizontal",
+                    offsetY: 7,
+                    text: signalEvent.side,
+                  }
+                }
+              })
             },
             stroke: { // seriesで指定したデータの描画で使われるwidth 更新に備えて、余分に用意しておく
               width: [1, 2, 2, 2, 2, 2, 2]
