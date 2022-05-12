@@ -23,8 +23,8 @@ func viewChartHandler(w http.ResponseWriter, r *http.Request) {
 func candleHandler(w http.ResponseWriter, r *http.Request) {
 	strLimit := r.URL.Query().Get("limit")
 	limit, err := strconv.Atoi(strLimit)
-	if err != nil {
-		limit = 100
+	if err != nil || limit > 300 {
+		limit = 300
 	}
 
 	candles, err := models.GetCandles(limit)

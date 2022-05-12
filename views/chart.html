@@ -11,7 +11,7 @@
   <body>
     <main>
       <div id="chart"></div>
-      Limit <input type="number" id="limit" value="100" /> <br />
+      Limit <input type="number" id="limit" value="300" /> <br />
       SMA <input type="checkbox" id="sma-enable" /> Period1 <input id="sma-period1" /> Period2 <input id="sma-period2" /> Period3 <input id="sma-period3" /> <br />
       EMA <input type="checkbox" id="ema-enable" /> Period1 <input id="ema-period1" /> Period2 <input id="ema-period2" /> Period3 <input id="ema-period3" /> <br />
       <button id="chart-update-button">OK</button>
@@ -88,6 +88,9 @@
 
           document.getElementById("chart-update-button").onclick = async () => {
             params = {};
+            if (document.getElementById("limit").value > 300) {
+              document.getElementById("limit").value = 300;
+            }
             params.limit = document.getElementById("limit").value;
 
             if (document.getElementById("sma-enable").checked) {
