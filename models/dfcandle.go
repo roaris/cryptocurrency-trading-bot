@@ -5,9 +5,10 @@ import (
 )
 
 type DataFrameCandle struct {
-	Candles []Candle `json:"candles"`
-	Smas    []Sma    `json:"smas,omitempty"`
-	Emas    []Ema    `json:"emas,omitempty"`
+	Candles      []Candle      `json:"candles"`
+	Smas         []Sma         `json:"smas,omitempty"`
+	Emas         []Ema         `json:"emas,omitempty"`
+	SignalEvents []SignalEvent `json:"signal_events"`
 }
 
 type Sma struct {
@@ -40,4 +41,9 @@ func (df *DataFrameCandle) AddEma(period int) {
 	if len(df.Candles) >= period {
 		df.Emas = append(df.Emas, Ema{period, algos.CalcEma(period, df.Closes())})
 	}
+}
+
+func (df *DataFrameCandle) AddEvents() {
+	signalEvents, _ := GetSignalEventsAfterTime(df.Candles[0].Timestamp)
+	df.SignalEvents = signalEvents
 }
